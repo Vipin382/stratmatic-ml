@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.scroll-hide::-webkit-scrollbar {
+  display: hidden;
+}
+
+iframe {
+  height: 93vh !important;
+  margin: 8px auto;
+  width: 90%;
+}

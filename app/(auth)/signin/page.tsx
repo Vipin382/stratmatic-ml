@@ -14,6 +14,7 @@ import { getCsrfToken, getProviders, signIn } from "next-auth/react";
 import { authOptions } from "@/utils/authOption";
 import { getServerSession } from "next-auth/next";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 interface UserSchemaInterface {
   email: string;
@@ -31,10 +32,32 @@ let userSchema: ObjectSchema<UserSchemaInterface> = object({
     .required("Password is Required"),
 });
 
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+  const csrfToken = await getCsrfToken(context);
+
+  // If the user is already logged in, redirect.
+  // Note: Make sure not to redirect to the same page
+  // To avoid an infinite loop!
+  if (session) {
+    return { redirect: { destination: "/dashboard" } };
+  }
+
+  return {
+    props: { csrfToken: csrfToken },
+  };
+}
+
+async function getData() {
+  const providers = await getProviders();
+
+  return providers;
+}
+
 const SignIn = ({
   csrfToken,
-  providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const providers = use(getData());
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
@@ -210,20 +233,3 @@ const SignIn = ({
 };
 
 export default SignIn;
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-  const csrfToken = await getCsrfToken(context);
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: "/dashboard" } };
-  }
-
-  const providers = await getProviders();
-  return {
-    props: { providers: providers, csrfToken: csrfToken },
-  };
-}

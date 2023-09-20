@@ -42,15 +42,15 @@ export const authOptions: NextAuthOptions = {
     }),
 
     GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.NEXT_PUBLIC_GITHUB_ID as string,
+      clientSecret: process.env.NEXT_PUBLIC_GITHUB_SECRET as string,
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID as string,
-      clientSecret: process.env.GOOGLE_SECRET as string,
+      clientId: process.env.NEXT_PUBLIC_GOOGLE_ID as string,
+      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET as string,
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
   pages: {
     signIn: "/signin",
     newUser: "/dashboard",

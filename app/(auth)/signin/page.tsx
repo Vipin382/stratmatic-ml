@@ -4,15 +4,10 @@ import { Input } from "@nextui-org/react";
 import { Button } from "@nextui-org/react";
 import { useFormik } from "formik/dist";
 import { object, string, ObjectSchema } from "yup";
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
+import { getCookie } from "cookies-next";
 import { FcGoogle } from "react-icons/fc";
 import { VscGithub } from "react-icons/Vsc";
-import { getCsrfToken, getProviders, signIn } from "next-auth/react";
-import { authOptions } from "@/utils/authOption";
-import { getServerSession } from "next-auth/next";
+import { getProviders, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
@@ -32,32 +27,16 @@ let userSchema: ObjectSchema<UserSchemaInterface> = object({
     .required("Password is Required"),
 });
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-  const csrfToken = await getCsrfToken(context);
-
-  // If the user is already logged in, redirect.
-  // Note: Make sure not to redirect to the same page
-  // To avoid an infinite loop!
-  if (session) {
-    return { redirect: { destination: "/dashboard" } };
-  }
-
-  return {
-    props: { csrfToken: csrfToken },
-  };
-}
-
 async function getData() {
   const providers = await getProviders();
 
   return providers;
 }
 
-const SignIn = ({
-  csrfToken,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const SignIn = () => {
   const providers = use(getData());
+  const csrfToken = getCookie("next-auth.csrf-token")?.split("|")[0];
+  console.log(csrfToken);
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
@@ -138,7 +117,9 @@ const SignIn = ({
               </Link>
             </span>
           </p>
-          <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+          {csrfToken && (
+            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+          )}
           <Input
             {...formik.getFieldProps("email")}
             color={Boolean(formik.errors.email) ? "danger" : "success"}
@@ -187,40 +168,30 @@ const SignIn = ({
             Login
           </Button>
           <p className="text-center text-xs text-stone-400">or continue with</p>
-          <div className="flex gap-2 container justify-center">
+          <div className="flex gap-4 container justify-center">
             {providers &&
               Object.values(providers).map((provider) => {
                 if (provider.name !== "Credentials") {
                   return provider.name === "Google" ? (
-                    <Badge
-                      size={"lg"}
-                      variant={"flat"}
-                      color="primary"
-                      className="cursor-pointer"
+                    <button
+                      className="cursor-pointer rounded-full overflow-hidden h-8 w-8"
                       key={provider.name}
                       onClick={() => {
-                        signIn(provider.id, {
-                          callbackUrl: "http://localhost:3000/dashboard",
-                        });
+                        signIn(provider.id);
                       }}
                     >
-                      <FcGoogle />
-                    </Badge>
+                      <FcGoogle className="h-8  w-8" />
+                    </button>
                   ) : (
-                    <Badge
-                      size={"lg"}
-                      variant={"flat"}
-                      color="primary"
-                      className="cursor-pointer"
+                    <button
+                      className="cursor-pointer rounded-full overflow-hidden h-8 w-8"
                       key={provider.name}
                       onClick={() => {
-                        signIn(provider.id, {
-                          callbackUrl: "http://localhost:3000/dashboard",
-                        });
+                        signIn(provider.id);
                       }}
                     >
-                      <VscGithub />
-                    </Badge>
+                      <VscGithub className="h-8  w-8" />
+                    </button>
                   );
                 }
               })}

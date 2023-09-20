@@ -26,6 +26,7 @@
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.0",
     "cloudinary": "^1.40.0",
+    "cookies-next": "^4.0.0",
     "country-data": "^0.0.31",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
